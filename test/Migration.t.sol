@@ -308,7 +308,6 @@ contract MigrationTest is DssTest, Script {
         // Also test spell can't schedule since chief is not live
         slate[0] = testSpell;
         Chief(newChief).vote(slate);
-        vm.roll(block.number + 11);
         Chief(newChief).lift(testSpell);
         vm.expectRevert("ds-auth-unauthorized");
         SpellLike(testSpell).schedule();
@@ -332,7 +331,6 @@ contract MigrationTest is DssTest, Script {
         // Vote in the mom-triggering-spell
         slate[0] = splitterStopSpell;
         Chief(newChief).vote(slate);
-        vm.roll(block.number + 11);
         Chief(newChief).lift(splitterStopSpell);
 
         // Mom can operate
@@ -343,7 +341,6 @@ contract MigrationTest is DssTest, Script {
         // Vote in the test spell
         slate[0] = testSpell;
         Chief(newChief).vote(slate);
-        vm.roll(block.number + 11);
         Chief(newChief).lift(testSpell);
 
         // Test spell can schedule
