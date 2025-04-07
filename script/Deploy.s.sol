@@ -3,7 +3,6 @@ pragma solidity ^0.8.21;
 
 import "forge-std/Script.sol";
 
-import { stdJson } from "forge-std/StdJson.sol";
 import { ScriptTools } from "dss-test/ScriptTools.sol";
 
 import { MigrationInstance, MigrationDeploy } from "deploy/MigrationDeploy.sol";
@@ -12,7 +11,6 @@ import { MockSpell } from "test/mocks/MockSpell.sol";
 
 contract DeployScript is Script {
 
-    using stdJson for string;
     using ScriptTools for string;
 
     address constant SKY_MEDIAN = 0x9f7Ce792d0ee09a6ce89eC2B9B236A44B0aCf73e; // https://chroniclelabs.org/dashboard/oracle/SKY/USD?blockchain=ETH
