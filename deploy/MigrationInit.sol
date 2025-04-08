@@ -150,8 +150,11 @@ library MigrationInit {
         // ESM full disablement
         EsmLike(dss.chainlog.getAddress("MCD_ESM")).file("min", type(uint256).max);
 
-        // Set SKY as MCD_GOV (should be done last as MCD_GOV is assumed as MKR above)
+        // Handle more chainlog keys (should be done last as MCD_GOV is assumed as MKR above)
         dss.chainlog.setAddress("MKR", dss.chainlog.getAddress("MCD_GOV"));
         dss.chainlog.setAddress("MCD_GOV", sky);
+        dss.chainlog.removeAddress("MCD_GOV_ACTIONS");
+        dss.chainlog.setAddress("MKR_GUARD", dss.chainlog.getAddress("GOV_GUARD"));
+        dss.chainlog.removeAddress("GOV_GUARD");
     }
 }

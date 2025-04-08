@@ -645,16 +645,29 @@ contract MigrationTest is DssTest, Script {
         assertEq(esm.min(), type(uint256).max);
     }
 
-    function testMcdGov() public {
+    function testGovChainlogActions() public {
         if (DEPLOY_AND_CAST_IN_TEST) {
             assertEq(chainlog.getAddress("MCD_GOV"), address(mkr));
             vm.expectRevert("dss-chain-log/invalid-key"); // does not exist
             chainlog.getAddress("MKR");
+
+            chainlog.getAddress("MCD_GOV_ACTIONS"); // does not revert
+
+            assertEq(chainlog.getAddress("GOV_GUARD"), AuthedLike(address(mkr)).authority());
+            vm.expectRevert("dss-chain-log/invalid-key"); // does not exist
+            chainlog.getAddress("MKR_GUARD");
 
             _execSpell();
         }
 
         assertEq(chainlog.getAddress("MCD_GOV"), address(sky));
         assertEq(chainlog.getAddress("MKR"), address(mkr));
+
+        vm.expectRevert("dss-chain-log/invalid-key"); // does not exist
+        chainlog.getAddress("MCD_GOV_ACTIONS");
+
+        vm.expectRevert("dss-chain-log/invalid-key"); // does not exist
+        chainlog.getAddress("GOV_GUARD");
+        assertEq(chainlog.getAddress("MKR_GUARD"), AuthedLike(address(mkr)).authority());
     }
 }
