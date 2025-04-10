@@ -6,7 +6,6 @@ import "forge-std/Script.sol";
 import { ScriptTools } from "dss-test/ScriptTools.sol";
 
 import { MigrationInstance, MigrationDeploy } from "deploy/MigrationDeploy.sol";
-import { MockMedian } from "test/mocks/MockMedian.sol";
 import { MockSpell } from "test/mocks/MockSpell.sol";
 
 contract DeployScript is Script {

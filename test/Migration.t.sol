@@ -20,7 +20,6 @@ import "forge-std/Script.sol";
 import "dss-test/DssTest.sol";
 
 import { MigrationInstance, MigrationDeploy } from "deploy/MigrationDeploy.sol";
-import { MockMedian } from "test/mocks/MockMedian.sol";
 import { MockSpell } from "test/mocks/MockSpell.sol";
 import { MockDssExecSpell } from "test/mocks/MockDssExecSpell.sol";
 import { LockstakeInstance } from "lib/lockstake/deploy/LockstakeInstance.sol";
