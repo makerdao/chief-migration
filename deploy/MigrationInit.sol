@@ -86,18 +86,18 @@ library MigrationInit {
         address sky = dss.chainlog.getAddress("SKY");
 
         // Sanity checks
-        require(ChiefLike(inst.chief).gov()             == sky,                 "MigrationInit/gov-mismatch");
-        require(ChiefLike(inst.chief).maxYays()         == cfg.maxYays,         "MigrationInit/maxYays-mismatch");
-        require(ChiefLike(inst.chief).launchThreshold() == cfg.launchThreshold, "MigrationInit/launchThreshold-mismatch");
-        require(ChiefLike(inst.chief).liftCooldown()    == cfg.liftCooldown,    "MigrationInit/liftCooldown-mismatch");
+        require(ChiefLike(inst.chief).gov()             == sky);
+        require(ChiefLike(inst.chief).maxYays()         == cfg.maxYays);
+        require(ChiefLike(inst.chief).launchThreshold() == cfg.launchThreshold);
+        require(ChiefLike(inst.chief).liftCooldown()    == cfg.liftCooldown);
 
-        require(VoteDelegateFactoryLike(inst.voteDelegateFactory).chief()   == inst.chief,                                                                          "MigrationInit/chief-mismatch");
-        require(VoteDelegateFactoryLike(inst.voteDelegateFactory).polling() == VoteDelegateFactoryLike(dss.chainlog.getAddress("VOTE_DELEGATE_FACTORY")).polling(), "MigrationInit/polling-mismatch");
+        require(VoteDelegateFactoryLike(inst.voteDelegateFactory).chief()   == inst.chief);
+        require(VoteDelegateFactoryLike(inst.voteDelegateFactory).polling() == VoteDelegateFactoryLike(dss.chainlog.getAddress("VOTE_DELEGATE_FACTORY")).polling());
 
-        require(OsmLike(inst.skyOsm).src() == cfg.skyMedianizer, "MigrationInit/skyMedianizer-mismatch");
+        require(OsmLike(inst.skyOsm).src() == cfg.skyMedianizer);
 
-        require(StakingRewardsLike(inst.lsskyUsdsFarm).stakingToken() == inst.lockstakeInstance.lssky,    "MigrationInit/stakingToken-mismatch");
-        require(StakingRewardsLike(inst.lsskyUsdsFarm).rewardsToken() == dss.chainlog.getAddress("USDS"), "MigrationInit/rewardsToken-mismatch");
+        require(StakingRewardsLike(inst.lsskyUsdsFarm).stakingToken() == inst.lockstakeInstance.lssky);
+        require(StakingRewardsLike(inst.lsskyUsdsFarm).rewardsToken() == dss.chainlog.getAddress("USDS"));
 
         // Chief migration
         // Note: this list does not include the Spark FREEZER_MOM, which authority should be changed in a Spark sub-spell
