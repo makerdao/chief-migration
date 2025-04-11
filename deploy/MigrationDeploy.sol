@@ -47,7 +47,7 @@ library MigrationDeploy {
         uint256      launchThreshold,
         uint256      liftCooldown,
         bytes memory osmCode, // passed as code (w/o ctr args) since built with an older compiler
-        address      median,
+        address      oracle,
         bytes32      lockstakeIlk,
         bytes4       lockstakeCalcSig
     ) internal returns (MigrationInstance memory inst) {
@@ -71,7 +71,7 @@ library MigrationDeploy {
             rate     : MkrSkyLike(chainlog.getAddress("MKR_SKY")).rate()
         });
 
-        inst.skyOsm = deployBytecode(osmCode,  abi.encode(median));
+        inst.skyOsm = deployBytecode(osmCode,  abi.encode(oracle));
         ScriptTools.switchOwner(inst.skyOsm, deployer, chainlog.getAddress("MCD_PAUSE_PROXY"));
 
         inst.lockstakeInstance = LockstakeDeploy.deployLockstake({
