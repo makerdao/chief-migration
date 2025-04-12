@@ -6,14 +6,13 @@ import "forge-std/Script.sol";
 import { ScriptTools } from "dss-test/ScriptTools.sol";
 
 import { MigrationInstance, MigrationDeploy } from "deploy/MigrationDeploy.sol";
-import { MockMedian } from "test/mocks/MockMedian.sol";
 import { MockSpell } from "test/mocks/MockSpell.sol";
 
 contract DeployScript is Script {
 
     using ScriptTools for string;
 
-    address constant SKY_MEDIAN = 0x9f7Ce792d0ee09a6ce89eC2B9B236A44B0aCf73e; // https://chroniclelabs.org/dashboard/oracle/SKY/USD?blockchain=ETH
+    address constant SKY_ORACLE = 0x9f7Ce792d0ee09a6ce89eC2B9B236A44B0aCf73e; // https://chroniclelabs.org/dashboard/oracle/SKY/USD?blockchain=ETH
 
     string ARTIFACTS_0_5_12_DIR = "0-5-12";
 
@@ -33,7 +32,7 @@ contract DeployScript is Script {
             launchThreshold   : 80_000 * 10 ** 18 * 24_000,
             liftCooldown      : 10,
             osmCode           : _get_code_0_5_12("osm.sol:OSM"),
-            median            : SKY_MEDIAN,
+            oracle            : SKY_ORACLE,
             lockstakeIlk      : "LSEV2-A",
             lockstakeCalcSig  : bytes4(abi.encodeWithSignature("newLinearDecrease(address)"))
         });

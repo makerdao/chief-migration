@@ -20,7 +20,6 @@ import "forge-std/Script.sol";
 import "dss-test/DssTest.sol";
 
 import { MigrationInstance, MigrationDeploy } from "deploy/MigrationDeploy.sol";
-import { MockMedian } from "test/mocks/MockMedian.sol";
 import { MockSpell } from "test/mocks/MockSpell.sol";
 import { MockDssExecSpell } from "test/mocks/MockDssExecSpell.sol";
 import { LockstakeInstance } from "lib/lockstake/deploy/LockstakeInstance.sol";
@@ -58,7 +57,7 @@ interface VowLike {
     function heal(uint256) external;
 }
 
-interface MedianLike {
+interface OracleLike {
     function kiss(address who) external;
 }
 
@@ -123,7 +122,7 @@ contract MigrationTest is DssTest, Script {
     string dependencies;
 
     ChainlogLike constant public chainlog = ChainlogLike(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
-    address constant public skyMedian = 0x9f7Ce792d0ee09a6ce89eC2B9B236A44B0aCf73e; // https://chroniclelabs.org/dashboard/oracle/SKY/USD?blockchain=ETH
+    address constant public skyOracle = 0x9f7Ce792d0ee09a6ce89eC2B9B236A44B0aCf73e; // https://chroniclelabs.org/dashboard/oracle/SKY/USD?blockchain=ETH
 
     address public vow;
     address public splitterStopSpell;
@@ -180,7 +179,7 @@ contract MigrationTest is DssTest, Script {
                 maxYays           : 5,
                 liftCooldown      : 10,
                 osmCode           : _get_code_0_5_12("osm.sol:OSM"),
-                median            : skyMedian,
+                oracle            : skyOracle,
                 lockstakeIlk      : "LSEV2-A",
                 lockstakeCalcSig  : bytes4(abi.encodeWithSignature("newLinearDecrease(address)"))
             });
@@ -216,10 +215,10 @@ contract MigrationTest is DssTest, Script {
         deal(address(mkr), address(this), 100_000 * 10**18);
         deal(address(sky), address(this), 100_000 * 24_000 * 10**18, true);
 
-        stdstore.target(skyMedian).sig("wards(address)").with_key(address(this)).depth(0).checked_write(uint256(1));
-        MedianLike(skyMedian).kiss(address(flapper));
-        MedianLike(skyMedian).kiss(migrationInstance.skyOsm);
-        stdstore.target(skyMedian).sig("wards(address)").with_key(address(this)).depth(0).checked_write(uint256(0));
+        stdstore.target(skyOracle).sig("wards(address)").with_key(address(this)).depth(0).checked_write(uint256(1));
+        OracleLike(skyOracle).kiss(address(flapper));
+        OracleLike(skyOracle).kiss(migrationInstance.skyOsm);
+        stdstore.target(skyOracle).sig("wards(address)").with_key(address(this)).depth(0).checked_write(uint256(0));
 
         vm.warp(block.timestamp + 1 hours);
         OsmLike(migrationInstance.skyOsm).poke();
@@ -433,15 +432,15 @@ contract MigrationTest is DssTest, Script {
         if (DEPLOY_AND_CAST_IN_TEST) {
            address flapSkyOracle = chainlog.getAddress("FLAP_SKY_ORACLE");
            assertEq(flapper.pip(), flapSkyOracle);
-           assertNotEq(flapSkyOracle, skyMedian);
+           assertNotEq(flapSkyOracle, skyOracle);
 
            _execSpell();
         }
 
         _prepareFlapping();
 
-        assertEq(flapper.pip(), skyMedian);
-        assertEq(chainlog.getAddress("FLAP_SKY_ORACLE"), skyMedian);
+        assertEq(flapper.pip(), skyOracle);
+        assertEq(chainlog.getAddress("FLAP_SKY_ORACLE"), skyOracle);
 
         vm.prank(pauseProxy); splitter.file("burn", 1e18);
         VowLike(vow).flap();
@@ -457,7 +456,7 @@ contract MigrationTest is DssTest, Script {
 
         address pipSky = chainlog.getAddress("PIP_SKY"); // does not revert
         assertEq(pipSky, migrationInstance.skyOsm);
-        assertEq(OsmLike(pipSky).src(), skyMedian);
+        assertEq(OsmLike(pipSky).src(), skyOracle);
 
         vm.prank(pauseProxy); OsmLike(pipSky).kiss(address(this));
         assertGt(OsmLike(pipSky).read(), 0);

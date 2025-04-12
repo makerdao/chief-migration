@@ -88,7 +88,7 @@ contract MockSpell {
                 maxYays: 5,
                 launchThreshold: 80_000 * 10**18 * 24_000,
                 liftCooldown: 10,
-                skyMedianizer: 0x9f7Ce792d0ee09a6ce89eC2B9B236A44B0aCf73e,
+                skyOracle: 0x9f7Ce792d0ee09a6ce89eC2B9B236A44B0aCf73e,
                 rewardsDuration: 5 days,
                 lockstakeConfig: LockstakeConfig({
                     ilk : "LSEV2-A",

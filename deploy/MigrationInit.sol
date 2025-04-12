@@ -20,7 +20,7 @@ import { DssInstance } from "dss-test/MCD.sol";
 import { SkyInit } from "lib/sky/deploy/SkyInit.sol";
 import { LockstakeInit, LockstakeConfig } from "lib/lockstake/deploy/LockstakeInit.sol";
 import { StakingRewardsInit, StakingRewardsInitParams } from "lib/endgame-toolkit/script/dependencies/StakingRewardsInit.sol";
-import { MigrationInstance } from "deploy/MigrationInstance.sol";
+import { MigrationInstance } from "./MigrationInstance.sol";
 
 interface ChiefLike {
     function gov() external view returns (address);
@@ -72,7 +72,7 @@ struct MigrationConfig {
     uint256 maxYays;
     uint256 launchThreshold;
     uint256 liftCooldown;
-    address skyMedianizer;
+    address skyOracle;
     uint256 rewardsDuration;
     LockstakeConfig lockstakeConfig;
 }
@@ -86,18 +86,18 @@ library MigrationInit {
         address sky = dss.chainlog.getAddress("SKY");
 
         // Sanity checks
-        require(ChiefLike(inst.chief).gov()             == sky,                 "MigrationInit/gov-mismatch");
-        require(ChiefLike(inst.chief).maxYays()         == cfg.maxYays,         "MigrationInit/maxYays-mismatch");
-        require(ChiefLike(inst.chief).launchThreshold() == cfg.launchThreshold, "MigrationInit/launchThreshold-mismatch");
-        require(ChiefLike(inst.chief).liftCooldown()    == cfg.liftCooldown,    "MigrationInit/liftCooldown-mismatch");
+        require(ChiefLike(inst.chief).gov()             == sky);
+        require(ChiefLike(inst.chief).maxYays()         == cfg.maxYays);
+        require(ChiefLike(inst.chief).launchThreshold() == cfg.launchThreshold);
+        require(ChiefLike(inst.chief).liftCooldown()    == cfg.liftCooldown);
 
-        require(VoteDelegateFactoryLike(inst.voteDelegateFactory).chief()   == inst.chief,                                                                          "MigrationInit/chief-mismatch");
-        require(VoteDelegateFactoryLike(inst.voteDelegateFactory).polling() == VoteDelegateFactoryLike(dss.chainlog.getAddress("VOTE_DELEGATE_FACTORY")).polling(), "MigrationInit/polling-mismatch");
+        require(VoteDelegateFactoryLike(inst.voteDelegateFactory).chief()   == inst.chief);
+        require(VoteDelegateFactoryLike(inst.voteDelegateFactory).polling() == VoteDelegateFactoryLike(dss.chainlog.getAddress("VOTE_DELEGATE_FACTORY")).polling());
 
-        require(OsmLike(inst.skyOsm).src() == cfg.skyMedianizer, "MigrationInit/skyMedianizer-mismatch");
+        require(OsmLike(inst.skyOsm).src() == cfg.skyOracle);
 
-        require(StakingRewardsLike(inst.lsskyUsdsFarm).stakingToken() == inst.lockstakeInstance.lssky,    "MigrationInit/stakingToken-mismatch");
-        require(StakingRewardsLike(inst.lsskyUsdsFarm).rewardsToken() == dss.chainlog.getAddress("USDS"), "MigrationInit/rewardsToken-mismatch");
+        require(StakingRewardsLike(inst.lsskyUsdsFarm).stakingToken() == inst.lockstakeInstance.lssky);
+        require(StakingRewardsLike(inst.lsskyUsdsFarm).rewardsToken() == dss.chainlog.getAddress("USDS"));
 
         // Chief migration
         // Note: this list does not include the Spark FREEZER_MOM, which authority should be changed in a Spark sub-spell
@@ -119,13 +119,13 @@ library MigrationInit {
         // New MKR to SKY migrator (must be done before initLockstake)
         SkyInit.updateMkrSky(dss, inst.mkrSky);
 
-        // Set the new SKY medianizer in the flapper
-        // Note: we assume the current flapper is given permission to read from the medianizer
-        FlapperLike(dss.chainlog.getAddress("MCD_FLAP")).file("pip", cfg.skyMedianizer);
-        dss.chainlog.setAddress("FLAP_SKY_ORACLE", cfg.skyMedianizer);
+        // Set the new SKY oracle in the flapper
+        // Note: we assume the current flapper is given permission to read from the oracle
+        FlapperLike(dss.chainlog.getAddress("MCD_FLAP")).file("pip", cfg.skyOracle);
+        dss.chainlog.setAddress("FLAP_SKY_ORACLE", cfg.skyOracle);
 
         // New SKY OSM (must be done before initLockstake)
-        // Note: we assume the OSM is given permission to read from the medianizer
+        // Note: we assume the OSM is given permission to read from the oracle
         // Note: the rest of the OSM setup is done in initLockstake below
         // Note: PIP_MKR is still used in the old lockstake, so we don't remove it yet from the chainlog
         dss.chainlog.setAddress("PIP_SKY", inst.skyOsm);
