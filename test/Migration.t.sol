@@ -274,6 +274,7 @@ contract MigrationTest is DssTest, Script {
             assertEq(AuthedLike(chainlog.getAddress("STARKNET_ESCROW_MOM")).authority(), oldChief);
             assertEq(AuthedLike(chainlog.getAddress("LINE_MOM")).authority(), oldChief);
             assertEq(AuthedLike(chainlog.getAddress("LITE_PSM_MOM")).authority(), oldChief);
+            assertEq(AuthedLike(chainlog.getAddress("SPBEAM_MOM")).authority(), oldChief);
 
             _execSpell();
         }
@@ -291,6 +292,7 @@ contract MigrationTest is DssTest, Script {
         assertEq(AuthedLike(chainlog.getAddress("STARKNET_ESCROW_MOM")).authority(), newChief);
         assertEq(AuthedLike(chainlog.getAddress("LINE_MOM")).authority(), newChief);
         assertEq(AuthedLike(chainlog.getAddress("LITE_PSM_MOM")).authority(), newChief);
+        assertEq(AuthedLike(chainlog.getAddress("SPBEAM_MOM")).authority(), newChief);
 
         sky.approve(address(newChief), 80_000 * 10 ** 18 * 24_000);
         Chief(newChief).lock(80_000 * 10 ** 18 * 24_000);
