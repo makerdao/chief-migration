@@ -110,6 +110,7 @@ library MigrationInit {
         AuthedLike(dss.chainlog.getAddress("STARKNET_ESCROW_MOM")).setAuthority(inst.chief);
         AuthedLike(dss.chainlog.getAddress("LINE_MOM")).setAuthority(inst.chief);
         AuthedLike(dss.chainlog.getAddress("LITE_PSM_MOM")).setAuthority(inst.chief);
+        AuthedLike(dss.chainlog.getAddress("SPBEAM_MOM")).setAuthority(inst.chief);
         dss.chainlog.setAddress("MCD_ADM", inst.chief);
 
         // New VoteDelegate factory (must be done before initLockstake)

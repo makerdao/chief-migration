@@ -44,6 +44,7 @@ interface VatLike {
     function sin(address) external view returns (uint256);
     function dai(address) external view returns (uint256);
     function urns(bytes32, address) external view returns (uint256, uint256);
+    function file(bytes32, bytes32, uint256) external;
 }
 
 interface VowLike {
@@ -273,6 +274,7 @@ contract MigrationTest is DssTest, Script {
             assertEq(AuthedLike(chainlog.getAddress("STARKNET_ESCROW_MOM")).authority(), oldChief);
             assertEq(AuthedLike(chainlog.getAddress("LINE_MOM")).authority(), oldChief);
             assertEq(AuthedLike(chainlog.getAddress("LITE_PSM_MOM")).authority(), oldChief);
+            assertEq(AuthedLike(chainlog.getAddress("SPBEAM_MOM")).authority(), oldChief);
 
             _execSpell();
         }
@@ -290,6 +292,7 @@ contract MigrationTest is DssTest, Script {
         assertEq(AuthedLike(chainlog.getAddress("STARKNET_ESCROW_MOM")).authority(), newChief);
         assertEq(AuthedLike(chainlog.getAddress("LINE_MOM")).authority(), newChief);
         assertEq(AuthedLike(chainlog.getAddress("LITE_PSM_MOM")).authority(), newChief);
+        assertEq(AuthedLike(chainlog.getAddress("SPBEAM_MOM")).authority(), newChief);
 
         sky.approve(address(newChief), 80_000 * 10 ** 18 * 24_000);
         Chief(newChief).lock(80_000 * 10 ** 18 * 24_000);
@@ -519,6 +522,8 @@ contract MigrationTest is DssTest, Script {
             _execSpell();
         }
 
+        vm.prank(pauseProxy); vat.file("LSEV2-A", "line", 50_000_000 * 10**45);
+
         LockstakeEngine newEngine = LockstakeEngine(chainlog.getAddress("LOCKSTAKE_ENGINE"));
 
         newEngine.open(0);
@@ -591,6 +596,8 @@ contract MigrationTest is DssTest, Script {
         if (DEPLOY_AND_CAST_IN_TEST) {
             _execSpell();
         }
+
+        vm.prank(pauseProxy); vat.file("LSEV2-A", "line", 50_000_000 * 10**45);
 
         address urn = _urnSetUp();
         _forceLiquidation(urn);
