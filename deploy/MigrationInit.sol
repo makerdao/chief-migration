@@ -101,7 +101,6 @@ library MigrationInit {
 
         // Chief migration
         // Note: this list does not include the Spark FREEZER_MOM, which authority should be changed in a Spark sub-spell
-        // TODO: add any other mom that is added before the chief migration, e.g. rate setter mom
         AuthedLike(dss.chainlog.getAddress("MCD_PAUSE")).setAuthority(inst.chief);
         AuthedLike(dss.chainlog.getAddress("SPLITTER_MOM")).setAuthority(inst.chief);
         AuthedLike(dss.chainlog.getAddress("OSM_MOM")).setAuthority(inst.chief);
