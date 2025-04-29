@@ -151,10 +151,10 @@ contract MigrationTest is DssTest, Script {
 
     // When true we deploy and simulate the spell as part of the test.
     // Otherwise we assume that was already done (which is suitable for a shared testnet/fork)
-    bool DEPLOY_AND_CAST_IN_TEST;
+    uint256 TEST_MODE;
 
     function setUp() public {
-        DEPLOY_AND_CAST_IN_TEST = vm.envOr("DEPLOY_AND_CAST_IN_TEST", true);
+        TEST_MODE = vm.envOr("TEST_MODE", uint256(0));
 
         vm.createSelectFork(vm.envString("ETH_RPC_URL"));
 
@@ -171,7 +171,7 @@ contract MigrationTest is DssTest, Script {
         pause             = chainlog.getAddress("MCD_PAUSE");
         pauseProxy        = chainlog.getAddress("MCD_PAUSE_PROXY");
 
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE == 0) {
             mkr = TokenLike(chainlog.getAddress("MCD_GOV"));
 
             migrationInstance = MigrationDeploy.deployMigration({
@@ -193,7 +193,32 @@ contract MigrationTest is DssTest, Script {
                 lsskyUsdsFarm_          : migrationInstance.lsskyUsdsFarm,
                 lockstakeInstance_      : migrationInstance.lockstakeInstance
             });
-        } else {
+        } else if (TEST_MODE == 1) {
+            mkr = TokenLike(chainlog.getAddress("MCD_GOV"));
+            dependencies = ScriptTools.loadDependencies("deployed"); // loads from FOUNDRY_SCRIPT_DEPS
+            migrationInstance = MigrationInstance({
+                chief               : dependencies.readAddress(".chief"),
+                voteDelegateFactory : dependencies.readAddress(".voteDelegateFactory"),
+                mkrSky              : dependencies.readAddress(".mkrSky"),
+                skyOsm              : dependencies.readAddress(".skyOsm"),
+                lsskyUsdsFarm       : dependencies.readAddress(".lsskyUsdsFarm"),
+                lockstakeInstance   : LockstakeInstance({
+                    lssky       : dependencies.readAddress(".lssky"),
+                    engine      : dependencies.readAddress(".engine"),
+                    clipper     : dependencies.readAddress(".clipper"),
+                    clipperCalc : dependencies.readAddress(".clipperCalc"),
+                    migrator    : dependencies.readAddress(".migrator")
+                })
+            });
+            spell = new MockSpell({
+                newChief_               : migrationInstance.chief,
+                newVoteDelegateFactory_ : migrationInstance.voteDelegateFactory,
+                newMkrSky_              : migrationInstance.mkrSky,
+                skyOsm_                 : migrationInstance.skyOsm,
+                lsskyUsdsFarm_          : migrationInstance.lsskyUsdsFarm,
+                lockstakeInstance_      : migrationInstance.lockstakeInstance
+            });
+        } else if (TEST_MODE == 2) {
             mkr = TokenLike(chainlog.getAddress("MKR"));
 
             dependencies = ScriptTools.loadDependencies("deployed"); // loads from FOUNDRY_SCRIPT_DEPS
@@ -211,6 +236,8 @@ contract MigrationTest is DssTest, Script {
                     migrator    : dependencies.readAddress(".migrator")
                 })
             });
+        } else {
+            revert("UNEXISTING TEST MODE");
         }
 
         deal(address(mkr), address(this), 100_000 * 10**18);
@@ -226,7 +253,7 @@ contract MigrationTest is DssTest, Script {
         vm.warp(block.timestamp + 1 hours);
         OsmLike(migrationInstance.skyOsm).poke();
 
-        if (!DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE == 2) {
             // spell poking was already done before the OSM had a price, so need to poke for engine borrowing
             spotter.poke("LSEV2-SKY-A");
         }
@@ -260,7 +287,7 @@ contract MigrationTest is DssTest, Script {
     }
 
     function testChiefMigration() public {
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             address oldChief = chainlog.getAddress("MCD_ADM");
             assertNotEq(oldChief, migrationInstance.chief);
             assertEq(AuthedLike(pause).authority(), oldChief);
@@ -358,7 +385,7 @@ contract MigrationTest is DssTest, Script {
     }
 
     function testVoteDelegateFactory() public {
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             address oldFactory = chainlog.getAddress("VOTE_DELEGATE_FACTORY");
             assertNotEq(oldFactory, migrationInstance.voteDelegateFactory);
             assertNotEq(chainlog.getAddress("VOTE_DELEGATE_FACTORY_LEGACY"), oldFactory);
@@ -395,7 +422,7 @@ contract MigrationTest is DssTest, Script {
 
     function testConverters() public {
         address oldMkrSky;
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             oldMkrSky = chainlog.getAddress("MKR_SKY");
             vm.expectRevert("dss-chain-log/invalid-key");
             chainlog.getAddress("MKR_SKY_LEGACY");
@@ -432,7 +459,7 @@ contract MigrationTest is DssTest, Script {
     }
 
     function testSplitToFlapper() public {
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
            address flapSkyOracle = chainlog.getAddress("FLAP_SKY_ORACLE");
            assertEq(flapper.pip(), flapSkyOracle);
            assertNotEq(flapSkyOracle, skyOracle);
@@ -450,7 +477,7 @@ contract MigrationTest is DssTest, Script {
     }
 
     function testOsm() public {
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             vm.expectRevert("dss-chain-log/invalid-key"); // does not exist
             chainlog.getAddress("PIP_SKY");
 
@@ -466,7 +493,7 @@ contract MigrationTest is DssTest, Script {
     }
 
     function testSplitToFarm() public {
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             assertNotEq(splitter.farm(), migrationInstance.lsskyUsdsFarm);
 
             vm.expectRevert("dss-chain-log/invalid-key"); // does not exist
@@ -495,7 +522,7 @@ contract MigrationTest is DssTest, Script {
     }
 
     function testLockstakeLockFree() public {
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             _execSpell();
         }
 
@@ -518,7 +545,7 @@ contract MigrationTest is DssTest, Script {
     }
 
     function testLockstakeDrawWipe() public {
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             _execSpell();
         }
 
@@ -537,7 +564,7 @@ contract MigrationTest is DssTest, Script {
     }
 
     function testLockstakeGetReward() public {
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             _execSpell();
         }
 
@@ -593,7 +620,7 @@ contract MigrationTest is DssTest, Script {
     }
 
     function testLockstakeLiquidation() public {
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             _execSpell();
         }
 
@@ -621,7 +648,7 @@ contract MigrationTest is DssTest, Script {
         vm.stopPrank();
 
         // we test the scenario where everything apart from the migrate call is done before the cast
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             _execSpell();
         }
 
@@ -629,7 +656,7 @@ contract MigrationTest is DssTest, Script {
     }
 
     function testFlopsTurnedOff() public {
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             _prepareFlopping();
             VowLike(vow).flop();
 
@@ -644,7 +671,7 @@ contract MigrationTest is DssTest, Script {
     }
 
     function testEsmTurnedOff() public {
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             assertLt(esm.min(), type(uint256).max);
             _execSpell();
         }
@@ -652,7 +679,7 @@ contract MigrationTest is DssTest, Script {
     }
 
     function testGovChainlogActions() public {
-        if (DEPLOY_AND_CAST_IN_TEST) {
+        if (TEST_MODE <= 1) {
             assertEq(chainlog.getAddress("MCD_GOV"), address(mkr));
             vm.expectRevert("dss-chain-log/invalid-key"); // does not exist
             chainlog.getAddress("MKR");

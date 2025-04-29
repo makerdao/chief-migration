@@ -24,9 +24,9 @@ export PRIVATE_KEY=<XXX>
 export DEPLOYER=<XXX>
 export FOUNDRY_ROOT_CHAINID=1
 export FOUNDRY_EXPORTS_OVERWRITE_LATEST=true
+export FOUNDRY_SCRIPT_DEPS="deployed"
 export PAUSE_PROXY="0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB"
 export PAUSE="0xbE286431454714F511008713973d3B053A2d38f3"
-export FOUNDRY_SCRIPT_DEPS="deployed"
 ```
 
 ### Spin up testnet
@@ -41,6 +41,11 @@ on Tenderly this is done through their UI
 ### Deploy (for testing purposes)
 ```
 forge script script/Deploy.s.sol:DeployScript --rpc-url $RPC_URL --broadcast -vvv --sender $DEPLOYER --private-key $PRIVATE_KEY --slow
+```
+
+### Run tests with deployed contracts and not initialized
+```
+TEST_MODE=1 ETH_RPC_URL=$RPC_URL forge test
 ```
 
 ### Change pause proxy owner
@@ -79,7 +84,7 @@ cast rpc --rpc-url $RPC_URL tenderly_setStorageAt $PAUSE_PROXY $(cast to-uint256
 cast call --rpc-url $RPC_URL $PAUSE_PROXY "owner()"
 ```
 
-### Test
+### Run tests with deployed contracts already initialized
 ```
-DEPLOY_AND_CAST_IN_TEST=false ETH_RPC_URL=$RPC_URL forge test
+TEST_MODE=2 ETH_RPC_URL=$RPC_URL forge test
 ```
