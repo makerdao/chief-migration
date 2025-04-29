@@ -12,7 +12,7 @@ contract DeployScript is Script {
 
     using ScriptTools for string;
 
-    address constant SKY_ORACLE = 0x9f7Ce792d0ee09a6ce89eC2B9B236A44B0aCf73e; // https://chroniclelabs.org/dashboard/oracle/SKY/USD?blockchain=ETH
+    address constant SKY_ORACLE = 0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff; // https://chroniclelabs.org/dashboard/oracle/SKY/USD?blockchain=ETH
 
     string ARTIFACTS_0_5_12_DIR = "0-5-12";
 
@@ -29,12 +29,12 @@ contract DeployScript is Script {
         MigrationInstance memory migrationInstance = MigrationDeploy.deployMigration({
             deployer          : deployerAddress,
             maxYays           : 5,
-            launchThreshold   : 80_000 * 10 ** 18 * 24_000,
+            launchThreshold   : 100_000 * 10**18 * 24_000,
             liftCooldown      : 10,
             osmCode           : _get_code_0_5_12("osm.sol:OSM"),
             oracle            : SKY_ORACLE,
-            lockstakeIlk      : "LSEV2-A",
-            lockstakeCalcSig  : bytes4(abi.encodeWithSignature("newLinearDecrease(address)"))
+            lockstakeIlk      : "LSEV2-SKY-A",
+            lockstakeCalcSig  : bytes4(abi.encodeWithSignature("newStairstepExponentialDecrease(address)"))
         });
         ScriptTools.exportContract("deployed", "chief", migrationInstance.chief);
         ScriptTools.exportContract("deployed", "voteDelegateFactory", migrationInstance.voteDelegateFactory);
