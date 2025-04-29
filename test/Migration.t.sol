@@ -123,7 +123,7 @@ contract MigrationTest is DssTest, Script {
     string dependencies;
 
     ChainlogLike constant public chainlog = ChainlogLike(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
-    address constant public skyOracle = 0x9f7Ce792d0ee09a6ce89eC2B9B236A44B0aCf73e; // https://chroniclelabs.org/dashboard/oracle/SKY/USD?blockchain=ETH
+    address constant public skyOracle = 0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff; // https://chroniclelabs.org/dashboard/oracle/SKY/USD?blockchain=ETH
 
     address public vow;
     address public splitterStopSpell;
@@ -176,13 +176,13 @@ contract MigrationTest is DssTest, Script {
 
             migrationInstance = MigrationDeploy.deployMigration({
                 deployer          : address(this),
-                launchThreshold   : 80_000 * 10 ** 18 * 24_000,
+                launchThreshold   : 100_000 * 10**18 * 24_000,
                 maxYays           : 5,
                 liftCooldown      : 10,
                 osmCode           : _get_code_0_5_12("osm.sol:OSM"),
                 oracle            : skyOracle,
-                lockstakeIlk      : "LSEV2-A",
-                lockstakeCalcSig  : bytes4(abi.encodeWithSignature("newLinearDecrease(address)"))
+                lockstakeIlk      : "LSEV2-SKY-A",
+                lockstakeCalcSig  : bytes4(abi.encodeWithSignature("newStairstepExponentialDecrease(address)"))
             });
 
             spell = new MockSpell({
@@ -228,7 +228,7 @@ contract MigrationTest is DssTest, Script {
 
         if (!DEPLOY_AND_CAST_IN_TEST) {
             // spell poking was already done before the OSM had a price, so need to poke for engine borrowing
-            spotter.poke("LSEV2-A");
+            spotter.poke("LSEV2-SKY-A");
         }
     }
 
@@ -294,8 +294,8 @@ contract MigrationTest is DssTest, Script {
         assertEq(AuthedLike(chainlog.getAddress("LITE_PSM_MOM")).authority(), newChief);
         assertEq(AuthedLike(chainlog.getAddress("SPBEAM_MOM")).authority(), newChief);
 
-        sky.approve(address(newChief), 80_000 * 10 ** 18 * 24_000);
-        Chief(newChief).lock(80_000 * 10 ** 18 * 24_000);
+        sky.approve(address(newChief), 100_000 * 10**18 * 24_000);
+        Chief(newChief).lock(100_000 * 10**18 * 24_000);
 
         address testSpell = address(new MockDssExecSpell());
         address[] memory slate = new address[](1);
@@ -522,7 +522,7 @@ contract MigrationTest is DssTest, Script {
             _execSpell();
         }
 
-        vm.prank(pauseProxy); vat.file("LSEV2-A", "line", 50_000_000 * 10**45);
+        vm.prank(pauseProxy); vat.file("LSEV2-SKY-A", "line", 50_000_000 * 10**45);
 
         LockstakeEngine newEngine = LockstakeEngine(chainlog.getAddress("LOCKSTAKE_ENGINE"));
 
@@ -582,12 +582,12 @@ contract MigrationTest is DssTest, Script {
         ClipperLike clip = ClipperLike(ChainlogLike(chainlog).getAddress("LOCKSTAKE_CLIP"));
         LockstakeEngine newEngine = LockstakeEngine(chainlog.getAddress("LOCKSTAKE_ENGINE"));
 
-        vm.prank(pauseProxy); spotter.file("LSEV2-A", "mat", 500 * 3 * 10**27); // make unsafe
-        spotter.poke("LSEV2-A");
+        vm.prank(pauseProxy); spotter.file("LSEV2-SKY-A", "mat", 500 * 3 * 10**27); // make unsafe
+        spotter.poke("LSEV2-SKY-A");
 
         assertEq(clip.kicks(), 0);
         assertEq(newEngine.urnAuctions(urn), 0);
-        dog.bark("LSEV2-A", address(urn), address(this));
+        dog.bark("LSEV2-SKY-A", address(urn), address(this));
         assertEq(clip.kicks(), 1);
         assertEq(newEngine.urnAuctions(urn), 1);
     }
@@ -597,7 +597,7 @@ contract MigrationTest is DssTest, Script {
             _execSpell();
         }
 
-        vm.prank(pauseProxy); vat.file("LSEV2-A", "line", 50_000_000 * 10**45);
+        vm.prank(pauseProxy); vat.file("LSEV2-SKY-A", "line", 50_000_000 * 10**45);
 
         address urn = _urnSetUp();
         _forceLiquidation(urn);
