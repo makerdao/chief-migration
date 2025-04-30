@@ -43,7 +43,7 @@ on Tenderly this is done through their UI
 forge script script/Deploy.s.sol:DeployScript --rpc-url $RPC_URL --broadcast -vvv --sender $DEPLOYER --private-key $PRIVATE_KEY --slow
 ```
 
-### Run tests with deployed contracts and not initialized
+### Run tests with contracts already deployed but not yet initialized
 ```
 TEST_MODE=1 ETH_RPC_URL=$RPC_URL forge test
 ```
