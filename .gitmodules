@@ -1,0 +1,28 @@
+[submodule "lib/forge-std"]
+	path = lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "lib/dss-test"]
+	path = lib/dss-test
+	url = https://github.com/makerdao/dss-test
+[submodule "lib/vote-delegate"]
+	path = lib/vote-delegate
+	url = https://github.com/makerdao/vote-delegate
+	branch = v3
+[submodule "lib/endgame-toolkit"]
+	path = lib/endgame-toolkit
+	url = https://github.com/makerdao/endgame-toolkit
+[submodule "lib/osm"]
+	path = lib/osm
+	url = https://github.com/makerdao/osm
+[submodule "lib/lockstake"]
+	path = lib/lockstake
+	url = https://github.com/makerdao/lockstake
+	branch = v2
+[submodule "lib/chief"]
+	path = lib/chief
+	url = https://github.com/makerdao/chief
+	branch = newchief
+[submodule "lib/sky"]
+	path = lib/sky
+	url = https://github.com/makerdao/sky
+	branch = one-direction
